@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from darwinloop._models import BenchmarkTask, EvolutionResult, GenerationInfo
 from darwinloop.core.archive import AgentArchive, AgentEntry
@@ -69,7 +67,7 @@ class DarwinLoop:
         self,
         target: str,
         tasks: list[BenchmarkTask] | None = None,
-        pack: "BenchmarkPack | None" = None,
+        pack: BenchmarkPack | None = None,
         model: str = "asi1",
         api_key: str = "",
         provider: str = "",

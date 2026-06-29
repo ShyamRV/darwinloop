@@ -37,7 +37,7 @@ class ParentSelector:
         self.lam = sigmoid_lambda
         self.alpha0 = sigmoid_alpha0
 
-    def select(self, archive: "AgentArchive", k: int) -> list["AgentEntry"]:
+    def select(self, archive: AgentArchive, k: int) -> list[AgentEntry]:
         """Sample *k* parents (with replacement) from *archive*.
 
         All valid agents have non-zero probability — this is the open-ended
@@ -57,7 +57,7 @@ class ParentSelector:
         if not weighted:
             raise ValueError("Archive has no valid agents to select from.")
 
-        agents, weights = zip(*weighted)
+        agents, weights = zip(*weighted, strict=False)
         total = sum(weights)
         probs = [w / total for w in weights]
 
@@ -65,7 +65,7 @@ class ParentSelector:
         for _ in range(k):
             r = random.random()
             cumulative = 0.0
-            for agent, p in zip(agents, probs):
+            for agent, p in zip(agents, probs, strict=False):
                 cumulative += p
                 if r <= cumulative:
                     selected.append(agent)
@@ -74,7 +74,7 @@ class ParentSelector:
                 selected.append(agents[-1])
         return selected
 
-    def probabilities(self, archive: "AgentArchive") -> list[tuple["AgentEntry", float]]:
+    def probabilities(self, archive: AgentArchive) -> list[tuple[AgentEntry, float]]:
         """Return ``(agent, probability)`` pairs sorted by descending probability.
 
         Args:
@@ -86,10 +86,10 @@ class ParentSelector:
         weighted = self._weights(archive)
         if not weighted:
             return []
-        agents, weights = zip(*weighted)
+        agents, weights = zip(*weighted, strict=False)
         total = sum(weights)
         probs = [w / total for w in weights]
-        return sorted(zip(agents, probs), key=lambda t: -t[1])
+        return sorted(zip(agents, probs, strict=False), key=lambda t: -t[1])
 
     # ── Internal ──────────────────────────────────────────────────────────────
 
@@ -97,8 +97,8 @@ class ParentSelector:
         return 1.0 / (1.0 + math.exp(-self.lam * (score - self.alpha0)))
 
     def _weights(
-        self, archive: "AgentArchive"
-    ) -> list[tuple["AgentEntry", float]]:
+        self, archive: AgentArchive
+    ) -> list[tuple[AgentEntry, float]]:
         eligible = [a for a in archive.valid() if a.benchmark_score < 1.0]
         if not eligible:
             eligible = archive.valid()

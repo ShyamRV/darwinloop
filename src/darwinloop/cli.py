@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from dotenv import load_dotenv
@@ -25,14 +23,14 @@ def evolve(
     target: str = typer.Argument(..., help="Path to the agent file or directory to evolve."),
     iterations: int = typer.Option(5, "--iterations", "-i", help="Number of improvement iterations."),
     model: str = typer.Option("asi1", "--model", "-m", help="LLM model: asi1 | claude | gpt-4o"),
-    tasks: Optional[str] = typer.Option(None, "--tasks", "-t", help="Path to a benchmarks.py file."),
-    pack: Optional[str] = typer.Option(None, "--pack", "-p", help="Built-in pack: routing | commerce | support"),
+    tasks: str | None = typer.Option(None, "--tasks", "-t", help="Path to a benchmarks.py file."),
+    pack: str | None = typer.Option(None, "--pack", "-p", help="Built-in pack: routing | commerce | support"),
     archive_path: str = typer.Option("darwinloop_output", "--archive", "-a", help="Output directory."),
     sandbox_timeout: int = typer.Option(30, "--timeout", help="Per-task sandbox timeout (seconds)."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Use mock LLM (free, no API key needed)."),
     auto: bool = typer.Option(False, "--auto", help="Skip interactive prompts between iterations."),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed LLM turn logs."),
-    report: Optional[str] = typer.Option(None, "--report", "-r", help="Save markdown report to this path."),
+    report: str | None = typer.Option(None, "--report", "-r", help="Save markdown report to this path."),
 ) -> None:
     """Evolve an agent's source code using darwinloop self-improvement.
 
@@ -43,7 +41,7 @@ def evolve(
         darwinloop evolve agent/router.py --pack routing --iterations 10
         darwinloop evolve agent/router.py --tasks my_benchmarks.py --auto
     """
-    from darwinloop import DarwinLoop, BenchmarkTask
+    from darwinloop import BenchmarkTask, DarwinLoop
 
     # Resolve target file
     target_path = Path(target)
@@ -164,7 +162,7 @@ def show_report(
 def show_diff(
     archive: str = typer.Argument("darwinloop_output", help="Path to the archive directory."),
     from_agent: str = typer.Option("agent_0000", "--from", help="Source agent ID."),
-    to_agent: Optional[str] = typer.Option(None, "--to", help="Target agent ID (default: best)."),
+    to_agent: str | None = typer.Option(None, "--to", help="Target agent ID (default: best)."),
 ) -> None:
     """Show the unified diff between two agent generations.
 
@@ -186,14 +184,14 @@ def show_diff(
         src = arc.get(from_agent)
     except KeyError:
         _console.print(f"[red]Agent {from_agent!r} not found in archive.[/]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
     if to_agent:
         try:
             dst = arc.get(to_agent)
         except KeyError:
             _console.print(f"[red]Agent {to_agent!r} not found in archive.[/]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
     else:
         dst = arc.best()
         if dst is None:
@@ -217,6 +215,7 @@ def show_diff(
 def _load_tasks_from_file(path: str) -> list:
     """Import a Python file and collect all BenchmarkTask instances."""
     import importlib.util
+
     from darwinloop._models import BenchmarkTask
 
     spec = importlib.util.spec_from_file_location("_user_tasks", path)

@@ -41,7 +41,7 @@ def test_probabilities_sum_to_one() -> None:
 def test_higher_score_preferred() -> None:
     archive = _archive(0.1, 0.9)
     sel = ParentSelector()
-    probs = dict((a.agent_id, p) for a, p in sel.probabilities(archive))
+    probs = {a.agent_id: p for a, p in sel.probabilities(archive)}
     assert probs["a1"] > probs["a0"]
 
 
@@ -65,6 +65,6 @@ def test_novelty_bonus_reduces_used_parent_probability() -> None:
     archive.add_agent(fresh)
 
     sel = ParentSelector()
-    probs = dict((a.agent_id, p) for a, p in sel.probabilities(archive))
+    probs = {a.agent_id: p for a, p in sel.probabilities(archive)}
     # p1 has no children so its novelty bonus is higher
     assert probs["p1"] > probs["p0"]

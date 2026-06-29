@@ -1,10 +1,8 @@
 """Tests for darwinloop sandbox (executor + validator)."""
 
-import pytest
 
 from darwinloop.sandbox.executor import SandboxExecutor
 from darwinloop.sandbox.validator import validate_code
-
 
 # ── Executor tests ────────────────────────────────────────────────────────────
 

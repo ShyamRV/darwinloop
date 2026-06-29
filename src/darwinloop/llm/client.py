@@ -5,7 +5,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +123,7 @@ class LLMClient:
             try:
                 import openai as _openai
             except ImportError:
-                raise ImportError("Run: pip install openai")
+                raise ImportError("Run: pip install openai") from None
             kwargs: dict[str, Any] = {"api_key": api_key}
             if base_url:
                 kwargs["base_url"] = base_url
@@ -134,7 +135,7 @@ class LLMClient:
             try:
                 import anthropic as _anthropic
             except ImportError:
-                raise ImportError("Run: pip install anthropic")
+                raise ImportError("Run: pip install anthropic") from None
             self._client = _anthropic.Anthropic(api_key=api_key)
 
         else:
@@ -218,7 +219,6 @@ class LLMClient:
 
     def _call(self, model: str, messages: list[dict], tools: list[dict]) -> Any:
         if self.provider == "anthropic":
-            import anthropic
             normed = _norm_anthropic(messages)
             resp = self._client.messages.create(  # type: ignore[union-attr]
                 model=model, max_tokens=8096, tools=tools, messages=normed
@@ -322,7 +322,7 @@ def get_llm_client(
     api_key: str = "",
     model: str = "",
     base_url: str = "",
-) -> "LLMClient | MockLLMClient":
+) -> LLMClient | MockLLMClient:
     """Return the appropriate LLM client.
 
     Provider priority (when *provider* is not explicitly set):
@@ -354,7 +354,7 @@ def get_llm_client(
         elif os.getenv("OPENAI_API_KEY", "").strip():
             provider = "openai"
         else:
-            raise EnvironmentError(
+            raise OSError(
                 "No LLM API key found. Set ASI1_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY, "
                 "or pass dry_run=True for a free mock simulation.\n"
                 "Get an ASI:One key at https://asi1.ai"

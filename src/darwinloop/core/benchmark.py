@@ -125,7 +125,7 @@ class BenchmarkSuite:
             score = 0.0
         else:
             weighted_sum = sum(
-                r.score * t.weight for r, t in zip(task_results, self.tasks)
+                r.score * t.weight for r, t in zip(task_results, self.tasks, strict=False)
             )
             score = weighted_sum / total_weight
 

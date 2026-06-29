@@ -1,6 +1,7 @@
 """Tests for the darwinloop CLI."""
 
 from pathlib import Path
+
 from typer.testing import CliRunner
 
 from darwinloop.cli import app

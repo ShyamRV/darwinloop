@@ -5,7 +5,6 @@ import pytest
 from darwinloop._models import BenchmarkTask
 from darwinloop.core.benchmark import BenchmarkSuite, _parse_score
 
-
 # ── Score parser ──────────────────────────────────────────────────────────────
 
 def test_parse_score_explicit() -> None:

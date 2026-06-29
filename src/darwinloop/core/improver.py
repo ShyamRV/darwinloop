@@ -9,9 +9,9 @@ import os
 import re
 import tempfile
 import uuid
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 from darwinloop.tools.bash_tool import BASH_TOOL, bash_tool
 from darwinloop.tools.edit_tool import EDIT_TOOL, editor_tool

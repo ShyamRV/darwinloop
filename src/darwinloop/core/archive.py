@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import json
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 import networkx as nx
 from rich.console import Console
@@ -60,7 +59,7 @@ class AgentEntry:
         self.generation = generation
         self.improvement_summary = improvement_summary
         self.eval_logs: list[str] = eval_logs or []
-        self.created_at = created_at or datetime.now(timezone.utc)
+        self.created_at = created_at or datetime.now(UTC)
 
     def to_dict(self) -> dict:
         """Serialise to a JSON-safe dictionary."""
@@ -78,7 +77,7 @@ class AgentEntry:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "AgentEntry":
+    def from_dict(cls, d: dict) -> AgentEntry:
         """Deserialise from a JSON dictionary."""
         entry = cls(
             agent_id=d["agent_id"],
@@ -95,7 +94,7 @@ class AgentEntry:
             try:
                 entry.created_at = datetime.fromisoformat(d["created_at"])
             except Exception:
-                entry.created_at = datetime.now(timezone.utc)
+                entry.created_at = datetime.now(UTC)
         return entry
 
     def __repr__(self) -> str:
@@ -149,7 +148,7 @@ class AgentArchive:
         try:
             return self._agents[agent_id]
         except KeyError:
-            raise KeyError(f"Agent '{agent_id}' not found in archive.")
+            raise KeyError(f"Agent '{agent_id}' not found in archive.") from None
 
     def all(self) -> list[AgentEntry]:
         """Return all agents, sorted by creation time."""
@@ -159,7 +158,7 @@ class AgentArchive:
         """Return only valid agents, sorted by creation time."""
         return [a for a in self.all() if a.is_valid]
 
-    def best(self) -> Optional[AgentEntry]:
+    def best(self) -> AgentEntry | None:
         """Return the valid agent with the highest benchmark score."""
         v = self.valid()
         return max(v, key=lambda a: a.benchmark_score) if v else None
@@ -221,7 +220,7 @@ class AgentArchive:
         Path(path).write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     @classmethod
-    def load(cls, path: str) -> "AgentArchive":
+    def load(cls, path: str) -> AgentArchive:
         """Load an archive from a JSON file.
 
         Args:
